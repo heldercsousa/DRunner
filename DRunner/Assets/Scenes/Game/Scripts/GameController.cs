@@ -14,8 +14,11 @@ namespace DRunner.Scenes
         public static GameController Instance;
         
         public UnityEvent OnPlay;
+        public UnityEvent OnPause;
+        public UnityEvent OnResume;
 
         public bool Playing { get; private set; } = false;
+        public bool Paused { get; private set; } = false;
 
         void Awake()
         {
@@ -29,6 +32,7 @@ namespace DRunner.Scenes
             }
         }
 
+        [ContextMenu("Play Game")]
         public void Play()
         {
             if (Playing)
@@ -37,6 +41,26 @@ namespace DRunner.Scenes
             }
             Playing = true;
             OnPlay.Invoke();
+        }
+
+        public void Pause()
+        {
+            if (Paused)
+            {
+                return;
+            }
+            Paused = true;
+            OnPause.Invoke();
+        }
+
+        public void Resume()
+        {
+            if (!Paused)
+            {
+                return;
+            }
+            Paused = false;
+            OnResume.Invoke();
         }
 
     }

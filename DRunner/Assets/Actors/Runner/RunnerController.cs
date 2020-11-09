@@ -77,7 +77,7 @@ namespace DRunner.Actors
         public void Run()
         {
             _animatorInstance.runtimeAnimatorController = runController;
-            forwardSpeed = 12.5f;
+            forwardSpeed = 20f;
         }
 
         public void Jump()

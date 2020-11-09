@@ -790,7 +790,10 @@ MonoBehaviour:
   sprintController: {fileID: 9100000, guid: 6cc513001c84c714baa94b6d24a332c4, type: 2}
   jumpController: {fileID: 9100000, guid: 54ff599963ec97843ad4d4ddeeb61810, type: 2}
   forwardSpeed: 0
-  sideMovementOffset: 1.75
+  sideMovementOffset: 3
+  OnProceduralTriggerEnter:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1228576651061589589
 GameObject:
   m_ObjectHideFlags: 0

@@ -8,86 +8,92 @@ namespace DRunner.Scenes
     /// <summary>
     /// Procedurally generates an environment where the level happens
     /// </summary>
-    public class ProceduralEnvironmentController : MonoBehaviour
+    [RequireComponent(typeof(ProceduralLevelController))]
+    public class ProceduralEnvironmentController : ProceduralIncrementalController
     {
-        public ProceduralObjectController[] roads;
+        private ProceduralLevelController _levelController;
 
-        // every road once instantiated
-        public List<ProceduralObjectController> _objectsPool;
-        private Vector3 _currentRoadSpawnPosition;
-        // roads been shown in scene
-        private Queue<ProceduralObjectController> _built;
-
-        void Awake()
+        protected override void Awake()
         {
-            if (roads.Length == 0 || roads.Any(x => x == null))
-            {
-                Debug.LogError("Roads não definido");
-            }
-            _currentRoadSpawnPosition = transform.position;
-            _objectsPool = new List<ProceduralObjectController>();
-            _built = new Queue<ProceduralObjectController>();
+            base.Awake();
+            
+            _levelController = GetComponent<ProceduralLevelController>();
 
             // build 4 pieces of same road for the game start
-            var po = _PickRandomProceduralObject();
-            for (var i = 0; i < 4; i++)
-            {
-                _Instantiate(po);
-            }
-        }
-
-        void _Instantiate(ProceduralObjectController po)
-        {
-            var newPo = Instantiate<ProceduralObjectController>(po, _currentRoadSpawnPosition, Quaternion.identity);
-            newPo.gameObject.name = po.gameObject.name;
-            _UpdateRoadSpawnPosition(newPo);
-            _objectsPool.Add(newPo);
-            _built.Enqueue(newPo);
-        }
-
-        void _ShowInstance(ProceduralObjectController po)
-        {
-            po.gameObject.transform.position = _currentRoadSpawnPosition;
-            po.gameObject.SetActive(true);
-            _built.Enqueue(po);
-            _UpdateRoadSpawnPosition(po);
-        }
-
-        void _UpdateRoadSpawnPosition(ProceduralObjectController lastObjectShown)
-        {
-            _currentRoadSpawnPosition = new Vector3(_currentRoadSpawnPosition.x, _currentRoadSpawnPosition.y, _currentRoadSpawnPosition.z + lastObjectShown.zSize);
-        }
-
-        ProceduralObjectController _PickRandomProceduralObject()
-        {
-            var poIdx = Random.Range(0, roads.Length);
-            var po = roads[poIdx];
-            return po;
+            Depth = 0;
+            StartCoroutine("_Start");
         }
 
         /// <summary>
-        /// Removes oldest (behind player) and insert other proceduralObject ahead, using object pool
+        /// Removes oldest road and level elements, and inserts a new road and level elements ahead the last one created
         /// </summary>
         public void Next()
         {
-            // removes the oldest
-            var oldestPO = _built.Dequeue();
-            oldestPO.gameObject.SetActive(false);
+            StartCoroutine("_Next");
+        }
 
-            // add one forward
-            var po = _PickRandomProceduralObject();
-            var availableInPool = _objectsPool
-                .Where(x => x.gameObject.name.Equals(po.gameObject.name) && !x.gameObject.activeSelf);
+        /// <summary>
+        /// Lazy adds 3 roads for the early game
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator _Start()
+        {
+            ProceduralObjectController insertedRoad = null;
+            for (int i = 1; i <= 3; i++)
+            {
+                Depth++;
 
-            var poAvailable = availableInPool.FirstOrDefault();
-            if (poAvailable!=null)
-            {
-                _ShowInstance(poAvailable);
-            }
-            else
-            {
-                _Instantiate(po);
+                // lazy inserts a road
+                string roadName = null;
+                if (insertedRoad != null)
+                {
+                    roadName = insertedRoad.gameObject.name;
+                } 
+                insertedRoad = InsertNewObject(roadName);
+                yield return null;
+
+                // lazy builds level elements over the road just created
+                if (i == 1)
+                {
+                    foreach (var obj in _levelController.BuildStartLevelElementsForDepth(Depth))
+                    {
+                        yield return null;
+                    } 
+                } 
+                else
+                {
+                    foreach (var obj in _levelController.BuildLevelForDepth(Depth))
+                    {
+                        yield return null;
+                    }
+                }
             }
         }
+
+         /// <summary>
+        /// Lazy removes and adds objects
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator _Next()
+        {
+            Depth++;
+
+            // lazy removes
+            foreach (var removedObj in RemoveObjectsAtOldestDepth())
+            {
+                yield return null;
+            }
+            
+            // lazy inserts a road
+           InsertNewObject();
+            yield return null;
+
+            // lazy builds level elements over the road just created
+            foreach (var removedObj in _levelController.BuildLevelForDepth(Depth))
+            {
+                yield return null;
+            }
+        }
+
     }
 }
