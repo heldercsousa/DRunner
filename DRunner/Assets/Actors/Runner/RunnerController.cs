@@ -94,10 +94,10 @@ namespace DRunner.Actors
             {
                 return;
             }
-            if (Mathf.Abs(worldDelta.y) > 3f)
-            {
-                return;
-            }
+            // if (Mathf.Abs(worldDelta.y) > 3f)
+            // {
+            //     return;
+            // }
 
             if (worldDelta.x > 0f)
             {
