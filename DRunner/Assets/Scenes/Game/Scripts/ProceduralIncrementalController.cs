@@ -57,6 +57,7 @@ namespace DRunner.Scenes
         /// <summary>
         /// inserts a new object right after the last one
         /// </summary>
+        /// <param name="objectName">name of the object desired. Leave null if wants to get a random one</param>
         /// <returns></returns>
         public ProceduralObjectController InsertNewObject(string objectName = null)
         {
@@ -114,7 +115,18 @@ namespace DRunner.Scenes
         private void _Instantiate(ProceduralObjectController po)
         {
             var spawnPosition = _GetSpawnPosition(po);
-            var newPo = Instantiate<ProceduralObjectController>(po, spawnPosition, Quaternion.identity);
+            
+            var rotate = UnityEngine.Random.Range(0,2);
+            var rotation = Quaternion.identity;
+            // if (rotate == 1)
+            // {
+            //     Debug.Log("inverso");
+            //     rotation = Quaternion.Inverse(rotation);
+            // } else {
+            //     Debug.Log("idenbtity");
+            // }
+
+            var newPo = Instantiate<ProceduralObjectController>(po, spawnPosition, rotation);
             newPo.gameObject.name = po.gameObject.name;
             newPo.Depth = Depth;
             _objectsPool.Add(newPo);

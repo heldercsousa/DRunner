@@ -931,11 +931,11 @@ MonoBehaviour:
     quadrant1: B
     quadrant2: D
   - name: BxF
-    quadrant1: D
+    quadrant1: B
     quadrant2: F
   - name: BxH
     quadrant1: B
-    quadrant2: F
+    quadrant2: H
   - name: CxC
     quadrant1: C
     quadrant2: C
@@ -1023,7 +1023,7 @@ MonoBehaviour:
   - name: HxG
     quadrant1: H
     quadrant2: G
-  quadrantZDimension: 12
+  quadrantZDimension: 10
 --- !u!1001 &105852669
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1620,7 +1620,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 239874350}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3, y: 0, z: 0}
+  m_LocalPosition: {x: -3, y: 0, z: -24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 87917943}
@@ -6811,7 +6811,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1264713794}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3, y: 0, z: 0}
+  m_LocalPosition: {x: 3, y: 0, z: -24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 87917943}
@@ -9819,7 +9819,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1850220480}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 87917943}

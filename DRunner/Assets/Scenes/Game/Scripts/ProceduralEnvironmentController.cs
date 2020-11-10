@@ -71,7 +71,7 @@ namespace DRunner.Scenes
         }
 
          /// <summary>
-        /// Lazy removes and adds objects
+        /// Lazy removes and adds roads, futher calling levelController to lazy remove and create level related elements
         /// </summary>
         /// <returns></returns>
         private IEnumerator _Next()

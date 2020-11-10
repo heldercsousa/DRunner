@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 using System.Linq;
 
 namespace DRunner.Scenes
@@ -9,7 +10,6 @@ namespace DRunner.Scenes
     /// Procedurally generates obstacles, enemies, collectibles and any object directly related to level, adjusting dificulty along gameplay.
     /// Based on following DRunner procedural level planning: https://docs.google.com/spreadsheets/d/1n3o6eK7pBYpVd7zxlNwid8qd67-AbC3-I25X963jS5k/edit?usp=sharing
     /// </summary>
-    // [RequireComponent(typeof(ProceduralLevelController))]
     public class ProceduralLevelController : MonoBehaviour
     {
         public ProceduralIncrementalController trailLeft;
@@ -20,7 +20,12 @@ namespace DRunner.Scenes
         public QuadrantCombination[] quadrantCombinations;
         public float quadrantZDimension;
 
-        private QuadrantTrailsCombination _lastQuadrantTrailsCombination;
+        // defines how many times the quadrant combination must be rendered
+        private QuadrantTrailsCombination _currentQuadrantTrailsCombination;
+        // defines how many times the quadrant combination must be rendered
+        private int _currentQuadrantTrailsCombinationRepetitions;
+        // defines how many times the quadrant combination was rendered
+        private int _currentQuadrantTrailsCombinationRepetitionsDone;
 
         void Awake()
         {
@@ -38,6 +43,18 @@ namespace DRunner.Scenes
             {
                 Debug.LogError("trailRight não definido");
             }
+
+            // full fill navigation properties (quadrant1Instance/quadrant2Instance) of quadrantCombinations
+           quadrantCombinations = quadrantCombinations
+            .Join(quadrantTrailsCombinations, qc => qc.quadrant1, qtc => qtc.Id, (qc, qtc) => {
+                qc.quadrant1Instance = qtc;
+                return qc;
+            })
+            .Join(quadrantTrailsCombinations, qc => qc.quadrant2, qtc => qtc.Id, (qc, qtc) => {
+                qc.quadrant2Instance = qtc;
+                return qc;
+            })
+            .ToArray();
         }
 
         /// <summary>
@@ -51,21 +68,17 @@ namespace DRunner.Scenes
             trailCenter.Depth = depth;
             trailRight.Depth = depth;
 
-            var initialQuadrantTrailsCombination = quadrantTrailsCombinations
-            .Where(x => x.trailLeftLocked && !x.trailCenterLocked && x.trailRightLocked)
-            .Single();
+            // only QuadrantTrailsCombination which Center is free to run by the player
+            _DefineNewQuadrantCombinationRepetition(x => x.quadrant2Instance.trailLeftLocked 
+                && !x.quadrant2Instance.trailCenterLocked 
+                && x.quadrant2Instance.trailRightLocked);
 
-            _lastQuadrantTrailsCombination = initialQuadrantTrailsCombination;
-
-            for (int i = 1; i <= 5; i++)// 5 quadrantes de 12 unidades (total 60 unidades (tamanho da road) )
+            // forces engine to create 5 equals quadrants, standing for the first obstacles player will head in the gameplay
+            _currentQuadrantTrailsCombinationRepetitions = 6;
+            
+            foreach (var item in _InsertQuadrantRepetition())
             {
-                var newObjLeft = trailLeft.InsertNewObject();
-                yield return newObjLeft;
-
-                trailCenter.SkipZSpace(quadrantZDimension);
-
-                var newObjRight = trailRight.InsertNewObject();
-                yield return newObjRight;
+                yield return item;
             }
         }
 
@@ -79,58 +92,109 @@ namespace DRunner.Scenes
             trailLeft.Depth = depth;
             trailCenter.Depth = depth;
             trailRight.Depth = depth;
-            
-            for (int i = 1; i <= 5; i++)// 5 quadrantes de 12 (total 60 - tamanho da road)
+
+            foreach (var obj in _InsertQuadrantRepetition())
             {
-                // gets a quadrantCombination which combines to _lastQuadrantTrailsCombination
-                var matchingQuadrants = quadrantCombinations
-                .Where(x => x.quadrant1.Equals(_lastQuadrantTrailsCombination.Id))
-                .ToArray();
-                
-                var randomQuadrantIdx = Random.Range(0, matchingQuadrants.Length);
-                var quadrantTrailsCombID = quadrantCombinations[randomQuadrantIdx].quadrant2;
-                var quadrantTrailsComb = quadrantTrailsCombinations.Where(x => x.Id.Equals(quadrantTrailsCombID)).Single();
-
-                // trail left
-                if (!quadrantTrailsComb.trailLeftLocked)
-                {
-                    var newOb = trailLeft.InsertNewObject();
-                    yield return newOb;
-                }
-                else
-                {
-                    trailLeft.SkipZSpace(quadrantZDimension);
-                }
-
-                // trail center
-                if (!quadrantTrailsComb.trailCenterLocked)
-                {
-                    var newOb = trailCenter.InsertNewObject();
-                    yield return newOb;
-                }
-                else
-                {
-                    trailCenter.SkipZSpace(quadrantZDimension);
-                }
-
-                // trail right
-                if (!quadrantTrailsComb.trailRightLocked)
-                {
-                    var newOb = trailRight.InsertNewObject();
-                    newOb.Depth = depth;
-                    yield return newOb;
-                }
-                else
-                {
-                    trailRight.SkipZSpace(quadrantZDimension);
-                }
-
-                _lastQuadrantTrailsCombination = quadrantTrailsComb;
-
+                yield return obj;
             }
-
         }
- 
+
+        /// <summary>
+        /// inserts an object in each of 3 trails, according to _currentQuadrantTrailsCombination
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<ProceduralObjectController> _InsertQuadrantRepetition()
+        {
+            // full fill 5 quadrants per detph
+            var qtdQuadrantsThisDepth = 0;
+
+            while (_currentQuadrantTrailsCombinationRepetitions - _currentQuadrantTrailsCombinationRepetitionsDone > 0)
+            {
+                var objLeft = _InsertObject(trailLeft, _currentQuadrantTrailsCombination.trailLeftLocked);
+                if (objLeft != null)
+                {
+                    yield return objLeft;
+                }
+                var objCenter = _InsertObject(trailCenter, _currentQuadrantTrailsCombination.trailCenterLocked);
+                if (objCenter != null)
+                {
+                    yield return objCenter;
+                }
+                var objRight = _InsertObject(trailRight, _currentQuadrantTrailsCombination.trailRightLocked);
+                if (objRight != null)
+                {
+                    yield return objRight;
+                }
+                qtdQuadrantsThisDepth++;
+                _currentQuadrantTrailsCombinationRepetitionsDone++;
+                if (_currentQuadrantTrailsCombinationRepetitions - _currentQuadrantTrailsCombinationRepetitionsDone == 0)
+                {
+                    // time to change the quadrantTrailsCombination repetition, where combination differs from the last one rendered
+                    _DefineNewQuadrantCombinationRepetition(x => x.quadrant2 != _currentQuadrantTrailsCombination.Id);
+                }
+                if (qtdQuadrantsThisDepth == 6) // 6 per Depth
+                {
+                    break;
+                }
+                // Debug.Log($"_InsertQuadrantRepetition done-- depth: {trailLeft.Depth} combi: {_currentQuadrantTrailsCombination.ToString()} -- currentQuadrantReptDone:{_currentQuadrantTrailsCombinationRepetitionsDone.ToString()}");
+            }
+        }
+
+        /// <summary>
+        /// inserts an object in a trail
+        /// </summary>
+        /// <param name="trail">instance of ProceduralIncrementalController</param>
+        /// <param name="trailLocked">indicates whether trail is blocked</param>
+        /// <returns></returns>
+        private ProceduralObjectController _InsertObject(ProceduralIncrementalController trail, bool trailLocked)
+        {
+            if (trailLocked)
+            {
+                var ob = trail.InsertNewObject();
+                return ob;
+            }
+            trail.SkipZSpace(quadrantZDimension);
+            return null;
+        }
+
+        // private void print(string txt, QuadrantCombination[] array)
+        // {
+        //     return txt + string.Join(System.Environment.NewLine, array.Select(x => x.ToArray()));
+        // }
+
+        /// <summary>
+        /// defines a new QuadrantCombination to be repeated in a random number of times, according to matching criterias
+        /// </summary>
+        /// <param name="filter">function to filter the QuadrantCombination list. Pass null to this param if you want method to pick an object in the entire list of QuadrantCombination</param>
+        private void _DefineNewQuadrantCombinationRepetition(Func<QuadrantCombination,bool> filter = null)
+        {
+            // Picks quadrants which matchs to last one rendered
+            var matchingQuadrants = quadrantCombinations
+            .Where(x => _currentQuadrantTrailsCombination == null || 
+                ( x.quadrant1.Equals(_currentQuadrantTrailsCombination.Id) && x.quadrant1 != x.quadrant2))
+            .ToArray();
+
+            if (filter!=null)
+            {
+                matchingQuadrants = matchingQuadrants
+                .Where(filter)
+                .ToArray();
+            }
+            
+            var randomQuadrantIdx = UnityEngine.Random.Range(0, matchingQuadrants.Length);
+            var quadrantTrailsComb = matchingQuadrants[randomQuadrantIdx].quadrant2Instance; // quadrant which combines to _currentQuadrantTrailsCombination
+
+            _currentQuadrantTrailsCombinationRepetitions = UnityEngine.Random.Range(1, 5); // this quadrant will repeat from 1 to 4 times
+            if (!quadrantTrailsComb.trailLeftLocked && !quadrantTrailsComb.trailCenterLocked && !quadrantTrailsComb.trailRightLocked)
+            {
+                _currentQuadrantTrailsCombinationRepetitions = 1;
+            }
+            _currentQuadrantTrailsCombinationRepetitionsDone = 0;
+            _currentQuadrantTrailsCombination = quadrantTrailsComb;
+
+            // Debug.Log($"_DefineNewQuadrantCombinationRepetition -- currentQuadrant:{_currentQuadrantTrailsCombination.ToString()} -- currenRepetition:{_currentQuadrantTrailsCombinationRepetitions}");
+        }
+
         [System.Serializable]
         public class QuadrantTrailsCombination
         {
@@ -138,6 +202,12 @@ namespace DRunner.Scenes
             public bool trailLeftLocked;
             public bool trailCenterLocked;
             public bool trailRightLocked;
+
+            public override string ToString()
+            {
+                Func<bool,string> txt = (locked) => locked ? "Locked" : "Free"; 
+                return $"{Id}|{txt(trailLeftLocked)}|{txt(trailCenterLocked)}|{txt(trailRightLocked)}";
+            }
         }
                
         [System.Serializable]
@@ -146,8 +216,9 @@ namespace DRunner.Scenes
             public string name;
             public string quadrant1;
             public string quadrant2;
+            public QuadrantTrailsCombination quadrant1Instance { get; set; }
+            public QuadrantTrailsCombination quadrant2Instance { get; set; }
         }
-
 
     }
 }

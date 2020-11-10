@@ -25,7 +25,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 102654}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -7.6290685e-10, y: 0.000000087419444, z: -0.008726637, w: 0.9999619}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -70,12 +70,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ySpawnOffset: 10.7
-  dimension: {x: 3, y: 3, z: 12}
+  dimension: {x: 3, y: 3, z: 10}
   colliders:
   - collider: {fileID: 4476688471352216150, guid: 275f15def4967f443898428ac05a3ebb,
       type: 3}
     ySpawnOffset: 0
     zSpawnOffset: 0
+  Depth: 23
 --- !u!1 &144342
 GameObject:
   m_ObjectHideFlags: 0
