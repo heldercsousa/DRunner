@@ -25,10 +25,20 @@ namespace DRunner.Actors
         public RuntimeAnimatorController sprintController;
         public RuntimeAnimatorController jumpController;
         public float forwardSpeed = 0f;
-        public float sideMovementOffset = 1.25f;
+        public SkinnedMeshRenderer meshRenderer;
 
         // events 
         public UnityEvent OnProceduralTriggerEnter;
+        public UnityEvent OnDeath;
+
+        public Vector3 targetTrail { get; private set; }
+        public Vector3 currentTrail { get; private set; }
+
+        public Vector3 trailLeft { get; private set; }
+        public Vector3 trailCenter { get; private set; }
+        public Vector3 trailRight { get; private set; }
+
+        public bool Freezed { get; private set; }
 
         void Awake() {
             if (Instance == null)
@@ -41,6 +51,7 @@ namespace DRunner.Actors
             }
 
             _animatorInstance = GetComponent<Animator>();
+            _animatorInstance.speed = 1.2f;
 
             if (idleController == null)
             {
@@ -66,16 +77,32 @@ namespace DRunner.Actors
             {
                 Debug.LogError("jumpController não definido");
             }
+            if (meshRenderer == null)
+            {
+                Debug.LogError("meshRenderer não definido");
+            }
+
+        }
+
+        void Start()
+        {
+            var levelCtr = Scenes.ProceduralLevelController.Instance;
+            trailLeft = levelCtr.trailLeft.transform.position;
+            trailCenter = levelCtr.trailCenter.transform.position;
+            trailRight = levelCtr.trailRight.transform.position;
+            currentTrail = trailCenter;
         }
 
         public void Walk()
         {
+             Freezed = false;
             _animatorInstance.runtimeAnimatorController = walkController;
             forwardSpeed = 5f; 
         }
 
         public void Run()
         {
+             Freezed = false;
             _animatorInstance.runtimeAnimatorController = runController;
             forwardSpeed = 20f;
         }
@@ -85,15 +112,40 @@ namespace DRunner.Actors
             _animatorInstance.runtimeAnimatorController = jumpController;
         }
 
+        public void Freeze()
+        {
+            Freezed = true;
+            _animatorInstance.speed = 0f;
+        }
+
+        public void Unfreeze()
+        {
+            Freezed = false;
+            _animatorInstance.speed = 1.2f;
+        }
+
+        public void Reset()
+        {
+            Freezed = false;
+            _animatorInstance.speed = 1.2f;
+            _animatorInstance.runtimeAnimatorController = idleController;
+            transform.position = trailCenter;
+        }
+
         void Update()
         {
-            // if (!GameController.Instance.IsPlaying)
-            // {
-            //     return;
-            // }
+            if (Freezed)
+            {
+                return;
+            }
 
             transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z + (forwardSpeed * Time.deltaTime));
 
+            if (!Scenes.CameraController.Instance.IntroductionDone)
+            {
+                return;
+            }
+            
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
@@ -120,11 +172,20 @@ namespace DRunner.Actors
 
         IEnumerator _MoveLeft()
         {
+            if (currentTrail == trailCenter)
+            {
+                targetTrail = trailLeft;
+            }
+            else if (currentTrail == trailRight)
+            {
+                targetTrail = trailCenter;
+            }
+
             float t = 0f;
-            float moveTime = 0.5f;
+            float moveTime = 0.6f;
 
             var startXPos = transform.position.x;
-            var targetXPos = transform.position.x - sideMovementOffset;
+            var targetXPos = targetTrail.x;
 
             while (t < moveTime)
             {
@@ -137,16 +198,26 @@ namespace DRunner.Actors
 
                 yield return null;
             }
-            
+
+            currentTrail = targetTrail;
         }
 
         IEnumerator _MoveRight()
         {
+            if (currentTrail == trailLeft)
+            {
+                targetTrail = trailCenter;
+            }
+            else if (currentTrail == trailCenter)
+            {
+                targetTrail = trailRight;
+            }
+
             float t = 0f;
-            float moveTime = 0.5f;
+            float moveTime = 0.6f;
 
             var startXPos = transform.position.x;
-            var targetXPos = transform.position.x + sideMovementOffset;
+            var targetXPos = targetTrail.x;
 
             while (t < moveTime)
             {
@@ -159,6 +230,7 @@ namespace DRunner.Actors
 
                 yield return null;
             }
+            currentTrail = targetTrail;
         }
 
         void OnTriggerEnter(Collider other) 
@@ -168,6 +240,38 @@ namespace DRunner.Actors
                 OnProceduralTriggerEnter.Invoke();
             }
         }
+
+        void OnCollisionEnter(Collision other) {
+            if (other.transform.tag.Equals(Scenes.ProceduralLevelController.Instance.enemyTag))
+            {
+                // transform.position = trailCenter;
+                StopAllCoroutines();
+                Freeze();
+
+                StartCoroutine(_Blink());
+                StartCoroutine(_Wait(1.5f));
+            }
+        }
+
+        IEnumerator _Wait(float seconds)
+		{
+			yield return new WaitForSeconds (seconds);
+            StopAllCoroutines();
+            OnDeath.Invoke();
+            meshRenderer.enabled = true;
+		}
+
+        IEnumerator _Blink()
+        {
+            while (true)
+            {
+                meshRenderer.enabled = false;
+                yield return new WaitForSeconds (0.1f);
+                meshRenderer.enabled = true;
+                 yield return new WaitForSeconds (0.1f);
+            }
+        }
+
 
     }
 

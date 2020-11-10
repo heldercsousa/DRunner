@@ -12,6 +12,7 @@ namespace DRunner.Scenes
     /// </summary>
     public class ProceduralLevelController : MonoBehaviour
     {
+        public static ProceduralLevelController Instance;
         public ProceduralIncrementalController trailLeft;
         public ProceduralIncrementalController trailCenter;
         public ProceduralIncrementalController trailRight;
@@ -19,6 +20,7 @@ namespace DRunner.Scenes
         public QuadrantTrailsCombination[] quadrantTrailsCombinations;
         public QuadrantCombination[] quadrantCombinations;
         public float quadrantZDimension;
+        public string enemyTag = "Enemy";
 
         // defines how many times the quadrant combination must be rendered
         private QuadrantTrailsCombination _currentQuadrantTrailsCombination;
@@ -29,6 +31,15 @@ namespace DRunner.Scenes
 
         void Awake()
         {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else if (!System.Object.ReferenceEquals(Instance, this))
+            {
+                Debug.LogError("Instância de ProceduralLevelController já existe");
+            }
+
             if (trailLeft == null)
             {
                 Debug.LogError("trailLeft não definido");
@@ -184,7 +195,7 @@ namespace DRunner.Scenes
             var randomQuadrantIdx = UnityEngine.Random.Range(0, matchingQuadrants.Length);
             var quadrantTrailsComb = matchingQuadrants[randomQuadrantIdx].quadrant2Instance; // quadrant which combines to _currentQuadrantTrailsCombination
 
-            _currentQuadrantTrailsCombinationRepetitions = UnityEngine.Random.Range(1, 5); // this quadrant will repeat from 1 to 4 times
+            _currentQuadrantTrailsCombinationRepetitions = UnityEngine.Random.Range(1, 4); // this quadrant will repeat from 1 to 3 times
             if (!quadrantTrailsComb.trailLeftLocked && !quadrantTrailsComb.trailCenterLocked && !quadrantTrailsComb.trailRightLocked)
             {
                 _currentQuadrantTrailsCombinationRepetitions = 1;

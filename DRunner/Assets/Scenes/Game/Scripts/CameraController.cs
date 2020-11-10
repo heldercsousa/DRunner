@@ -13,23 +13,34 @@ namespace DRunner.Scenes
     [RequireComponent(typeof(Animator))]
     public class CameraController : MonoBehaviour
     {
+        public static CameraController Instance;
+
         private Animator _cameraAnimator;
-        private bool _introductionDone = false;
 
         // z offset from player
         public float zOffset = 15f;
 
         public UnityEvent OnIntroductionDone;
 
+        public bool IntroductionDone { get; private set; } = false;
+
         void Awake()
         {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else if (!System.Object.ReferenceEquals(Instance, this))
+            {
+                Debug.LogError("Instância de CameraController já existe");
+            }
             _cameraAnimator = GetComponent<Animator>();
             // Introduce();
         }
 
         public void Introduce()
         {
-            if (!_introductionDone)
+            if (!IntroductionDone)
             {
                 _cameraAnimator.Play("CameraPlay");
             }
@@ -37,7 +48,7 @@ namespace DRunner.Scenes
 
         public void HandleCameraIntrodutionDone()
         {
-            _introductionDone = true;
+            IntroductionDone = true;
             _cameraAnimator.enabled = false; // allow transform to be moved
             StartCoroutine(_FollowRunner());
             OnIntroductionDone.Invoke();
