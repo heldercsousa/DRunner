@@ -36,7 +36,7 @@ namespace DRunner.Scenes
         }
 
         /// <summary>
-        /// removes procedural objects at the oldest depth still active, and returns a lazy list of removed objects 
+        /// lazy removes procedural objects at the oldest depth still active, returning a list of removed objects 
         /// </summary>
         public IEnumerable<ProceduralObjectController> RemoveObjectsAtOldestDepth()
         {

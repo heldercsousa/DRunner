@@ -906,6 +906,17 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1603528626}
+        m_MethodName: StartClicked
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   OnPause:
     m_PersistentCalls:
       m_Calls:
@@ -9443,12 +9454,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6504415d6269b684fb4ce15472f0e049, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pauseButton: {fileID: 501079434}
-  pauseButtonImage: {fileID: 501079435}
-  resumeButton: {fileID: 861598525}
-  resumeButtonImage: {fileID: 861598526}
-  quitButton: {fileID: 1787543456}
-  quitButtonImage: {fileID: 1787543457}
   pausePanelImage: {fileID: 1687810342}
   mainPanelImage: {fileID: 1201056192}
 --- !u!1001 &1605287076

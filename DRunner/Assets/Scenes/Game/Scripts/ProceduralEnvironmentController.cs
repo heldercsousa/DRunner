@@ -78,7 +78,7 @@ namespace DRunner.Scenes
         {
             Depth++;
 
-            // lazy removes
+            // lazy removes oldest road
             foreach (var removedObj in RemoveObjectsAtOldestDepth())
             {
                 yield return null;
@@ -88,8 +88,17 @@ namespace DRunner.Scenes
            InsertNewObject();
             yield return null;
 
+            // lazy removes oldest level elements
+            // foreach (var obj in _levelController.RemoveObjectsAtOldestDepth())
+            // {
+            //     yield return null;
+            // }
+
+            // removes oldest level elements at once (may show perfomance spikes)
+            _levelController.RemoveObjectsAtOldestDepth();
+
             // lazy builds level elements over the road just created
-            foreach (var removedObj in _levelController.BuildLevelForDepth(Depth))
+            foreach (var obj in _levelController.BuildLevelForDepth(Depth))
             {
                 yield return null;
             }

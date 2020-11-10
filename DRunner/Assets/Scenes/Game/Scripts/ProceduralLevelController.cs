@@ -111,7 +111,30 @@ namespace DRunner.Scenes
         }
 
         /// <summary>
-        /// inserts an object in each of 3 trails, according to _currentQuadrantTrailsCombination
+        ///  lazy removes elements from oldest level depth
+        /// </summary>
+        /// <param name="depth"></param>
+        /// <returns></returns>
+        public IEnumerable<ProceduralObjectController> RemoveObjectsAtOldestDepth()
+        {
+            return default;
+            // foreach (var item in trailLeft.RemoveObjectsAtOldestDepth())
+            // {
+            //     yield return item;
+            // }
+            // foreach (var item in trailCenter.RemoveObjectsAtOldestDepth())
+            // {
+            //     yield return item;
+            // }
+            // foreach (var item in trailRight.RemoveObjectsAtOldestDepth())
+            // {
+            //     yield return item;
+            // }
+        }
+
+
+        /// <summary>
+        /// inserts an object in each of 3 trails, according to _currentQuadrantTrailsCombination, and removes oldests
         /// </summary>
         /// <returns></returns>
         private IEnumerable<ProceduralObjectController> _InsertQuadrantRepetition()

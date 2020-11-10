@@ -174,18 +174,18 @@ namespace DRunner.Actors
         {
             if (currentTrail == trailCenter)
             {
-                targetTrail = trailLeft;
+                currentTrail = trailLeft;
             }
             else if (currentTrail == trailRight)
             {
-                targetTrail = trailCenter;
+                currentTrail = trailCenter;
             }
 
             float t = 0f;
             float moveTime = 0.6f;
 
             var startXPos = transform.position.x;
-            var targetXPos = targetTrail.x;
+            var targetXPos = currentTrail.x;
 
             while (t < moveTime)
             {
@@ -198,26 +198,24 @@ namespace DRunner.Actors
 
                 yield return null;
             }
-
-            currentTrail = targetTrail;
         }
 
         IEnumerator _MoveRight()
         {
             if (currentTrail == trailLeft)
             {
-                targetTrail = trailCenter;
+                currentTrail = trailCenter;
             }
             else if (currentTrail == trailCenter)
             {
-                targetTrail = trailRight;
+                currentTrail = trailRight;
             }
 
             float t = 0f;
             float moveTime = 0.6f;
 
             var startXPos = transform.position.x;
-            var targetXPos = targetTrail.x;
+            var targetXPos = currentTrail.x;
 
             while (t < moveTime)
             {
@@ -230,7 +228,6 @@ namespace DRunner.Actors
 
                 yield return null;
             }
-            currentTrail = targetTrail;
         }
 
         void OnTriggerEnter(Collider other) 
