@@ -22,6 +22,9 @@
 # Asset Store Files
 [Dd]Runner/[Aa]ssets/[Aa]ssets*
 
+# tmp
+[Tt]mp*
+
 # Visual Studio cache directory
 .vs/
 

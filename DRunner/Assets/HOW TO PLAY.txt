@@ -1,0 +1,11 @@
+ORIENTAÇÕES SOBRE COMO JOGAR
+O jogo é bem simples, e possui apenas 2 comandos. Desviar para a direita, ou desviar para a esquerda.
+
+OBJETIVO
+------------
+Desviar dos obstáculos na pista e alcançar a maior distância possível
+
+COMANDOS
+------------
+Desviar para direita: deslizar 1 dedo para a direita na tela do celular 
+Desviar para esquerda: deslizar 1 dedo para a esquerda na tela do celular 

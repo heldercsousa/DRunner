@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using DRunner.Scenes;
 
 namespace DRunner.Actors
 {
     /// <summary>
-    /// Singleton type. Stands for the main player actor (plays animations, listen to user inputs and reacts to them, and reacts to environment events) 
+    /// Singleton type. Stands for the main player actor (plays animations, listen to user inputs and reacts to them, and reacts to environment events)
     /// </summary>
     [RequireComponent(typeof(Animator))]
     public class RunnerController : MonoBehaviour
@@ -16,7 +17,7 @@ namespace DRunner.Actors
 
         // private fieds
         private Animator _animatorInstance;
-        
+
         // instance fieds
         public RuntimeAnimatorController idleController;
         public RuntimeAnimatorController walkController;
@@ -27,7 +28,7 @@ namespace DRunner.Actors
         public float forwardSpeed = 0f;
         public SkinnedMeshRenderer meshRenderer;
 
-        // events 
+        // events
         public UnityEvent OnProceduralTriggerEnter;
         public UnityEvent OnDeath;
 
@@ -39,6 +40,9 @@ namespace DRunner.Actors
         public Vector3 trailRight { get; private set; }
 
         public bool Freezed { get; private set; }
+
+        private Vector2 tp1;
+        private Vector2 tp2;
 
         void Awake() {
             if (Instance == null)
@@ -84,6 +88,29 @@ namespace DRunner.Actors
 
         }
 
+        public void HandleFingerSwipe(Vector3 worldDelta)
+        {
+            if (!GameController.Instance.Playing || GameController.Instance.Paused)
+            {
+                return;
+            }
+            if (Mathf.Abs(worldDelta.y) > 3f)
+            {
+                return;
+            }
+
+            if (worldDelta.x > 0f)
+            {
+                StopAllCoroutines();
+                StartCoroutine(_MoveLeft());
+            }
+            if (worldDelta.x < 0f)
+            {
+                StopAllCoroutines();
+                StartCoroutine(_MoveRight());
+            }
+        }
+
         void Start()
         {
             var levelCtr = Scenes.ProceduralLevelController.Instance;
@@ -97,7 +124,7 @@ namespace DRunner.Actors
         {
              Freezed = false;
             _animatorInstance.runtimeAnimatorController = walkController;
-            forwardSpeed = 5f; 
+            forwardSpeed = 5f;
         }
 
         public void Run()
@@ -145,7 +172,7 @@ namespace DRunner.Actors
             {
                 return;
             }
-            
+
 #if UNITY_EDITOR || UNITY_STANDALONE_WIN
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
@@ -159,16 +186,9 @@ namespace DRunner.Actors
             }
 #endif
 
-#if UNITY_ANDROID
-            // if (Input.touchCount == 1)
-            // {
-            //     var touch = Input.touches[0];
-            //     if (touch.phase == TouchPhase.Began)
-            //     {
-            //     }
-            // }
-#endif
+
         }
+
 
         IEnumerator _MoveLeft()
         {
@@ -230,7 +250,7 @@ namespace DRunner.Actors
             }
         }
 
-        void OnTriggerEnter(Collider other) 
+        void OnTriggerEnter(Collider other)
         {
             if (other.tag == "ProceduralTrigger")
             {

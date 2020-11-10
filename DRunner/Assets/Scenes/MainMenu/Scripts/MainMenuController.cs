@@ -23,23 +23,10 @@ namespace DRunner.Scenes
             #if UNITY_EDITOR || UNITY_STANDALONE_WIN
             if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
             {
-                 Play();
-            }
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                 Quit();
+                 Play(null);
             }
             #endif
 
-            #if UNITY_ANDROID
-            if (Input.touchCount == 1)
-            {
-                var touch = Input.touches[0];
-                if (touch.phase == TouchPhase.Began)
-                {
-                    Play();
-                }
-            }
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 if (!GameController.Instance.Playing)
@@ -47,10 +34,10 @@ namespace DRunner.Scenes
                     Quit();
                 }
             }
-            #endif
+
         }
 
-        void Play()
+        void Play(Lean.Touch.LeanFinger finger)
         {
             backgroundImage.enabled = false;
             titleImage.enabled = false;
@@ -62,6 +49,16 @@ namespace DRunner.Scenes
         void Quit()
         {
             Application.Quit();
+        }
+
+        void OnEnable()
+        {
+            Lean.Touch.LeanTouch.OnFingerTap += Play;
+        }
+
+        void OnDisable()
+        {
+            Lean.Touch.LeanTouch.OnFingerTap -= Play;
         }
     } 
 }
