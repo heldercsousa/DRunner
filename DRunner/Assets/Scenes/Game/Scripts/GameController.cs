@@ -62,6 +62,5 @@ namespace DRunner.Scenes
             Paused = false;
             OnResume.Invoke();
         }
-
     }
 }

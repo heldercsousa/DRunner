@@ -4,55 +4,84 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class GameCanvasController : MonoBehaviour
+
+namespace DRunner.Scenes
 {
-    public Image pausePanelImage;
-    public Image mainPanelImage;
-
-    void Awake()
+    /// <summary>
+        /// controls game play UI
+        /// </summary>
+    public class GameCanvasController : MonoBehaviour
     {
-        if (pausePanelImage == null)
+        public Image pausePanelImage;
+        public Button pauseButton;
+        public Image mainPanelImage;
+
+        void Awake()
         {
-            Debug.LogError("pausePanelImage nao definido");
+            if (pausePanelImage == null)
+            {
+                Debug.LogError("pausePanelImage nao definido");
+            }
+
+            if (mainPanelImage == null)
+            {
+                Debug.LogError("mainPanelImage nao definido");
+            }
+
+            if (pauseButton == null)
+            {
+                Debug.LogError("pauseButton nao definido");
+            }
+
+            mainPanelImage.gameObject.SetActive(false);
+            pausePanelImage.gameObject.SetActive(false);
         }
 
-        if (mainPanelImage == null)
+        // Update is called once per frame
+        public void StartClicked()
         {
-            Debug.LogError("mainPanelImage nao definido");
+            mainPanelImage.gameObject.SetActive(false);
+            mainPanelImage.enabled = false;
+            pausePanelImage.gameObject.SetActive(false);
         }
 
-        mainPanelImage.gameObject.SetActive(false);
-        pausePanelImage.gameObject.SetActive(false);
-    }
+        public void CameraIntroductionDone()
+        {
+            mainPanelImage.gameObject.SetActive(true);
+            mainPanelImage.enabled = false;
+        }
 
-    // Update is called once per frame
-    public void StartClicked()
-    {
-        mainPanelImage.gameObject.SetActive(true);
-        mainPanelImage.enabled = false;
-        pausePanelImage.gameObject.SetActive(false);
-    }
+        public void QuitClicked()
+        {
+            mainPanelImage.gameObject.SetActive(false);
+            pausePanelImage.gameObject.SetActive(false);
+        
+            SceneManager.LoadScene("MainMenu");
+        }
 
-    public void QuitClicked()
-    {
-        mainPanelImage.gameObject.SetActive(false);
-        pausePanelImage.gameObject.SetActive(false);
-       
-        SceneManager.LoadScene("MainMenu");
-    }
+        public void ResumeClicked()
+        {
+            mainPanelImage.gameObject.SetActive(true);
+            mainPanelImage.enabled = false;
+            pausePanelImage.gameObject.SetActive(false);
+        }
 
-    public void ResumeClicked()
-    {
-        mainPanelImage.gameObject.SetActive(true);
-        mainPanelImage.enabled = false;
-        pausePanelImage.gameObject.SetActive(false);
-    }
+        public void PauseClicked()
+        {
+            mainPanelImage.gameObject.SetActive(true);
+            mainPanelImage.enabled = true;
+            pausePanelImage.gameObject.SetActive(true);
+        }
 
-    public void PauseClicked()
-    {
-        mainPanelImage.gameObject.SetActive(true);
-        mainPanelImage.enabled = true;
-        pausePanelImage.gameObject.SetActive(true);
+        void Update() {
+            if (GameController.Instance.Playing && !GameController.Instance.Paused)
+            {
+                if (Input.GetKey("escape") && CameraController.Instance.IntroductionDone) // se estiver introduzindo a cena, não deixa pausar!
+                {
+                    pauseButton.onClick.Invoke(); // aciona o botão pause da UI
+                }
+            }    
+        }
     }
     
 }

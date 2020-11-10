@@ -25,6 +25,10 @@ namespace DRunner.Scenes
             {
                  Play();
             }
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                 Quit();
+            }
             #endif
 
             #if UNITY_ANDROID
@@ -34,6 +38,13 @@ namespace DRunner.Scenes
                 if (touch.phase == TouchPhase.Began)
                 {
                     Play();
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (!GameController.Instance.Playing)
+                {
+                    Quit();
                 }
             }
             #endif
@@ -46,6 +57,11 @@ namespace DRunner.Scenes
             titleText.enabled = false;
             tapText.enabled = false;
             DRunner.Scenes.GameController.Instance.Play();
+        }
+
+        void Quit()
+        {
+            Application.Quit();
         }
     } 
 }
