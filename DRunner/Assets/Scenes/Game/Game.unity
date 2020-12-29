@@ -2672,13 +2672,13 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   ScreenDepth:
-    Conversion: 1
+    Conversion: 0
     Camera: {fileID: 0}
     Object: {fileID: 0}
     Layers:
       serializedVersion: 2
       m_Bits: 4294967291
-    Distance: 0
+    Distance: 10
   onWorldFrom:
     m_PersistentCalls:
       m_Calls: []
@@ -4651,6 +4651,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Bridge_A
+      objectReference: {fileID: 0}
+    - target: {fileID: 7345417311462737526, guid: d90eb169bd7b0ec4989ccec8323188da,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d90eb169bd7b0ec4989ccec8323188da, type: 3}
@@ -21526,14 +21531,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TapThreshold: 0.2
-  SwipeThreshold: 100
+  SwipeThreshold: 50
   ReferenceDpi: 200
   GuiLayers:
     serializedVersion: 2
     m_Bits: 32
   RecordFingers: 1
   RecordThreshold: 5
-  RecordLimit: 10
+  RecordLimit: 0
   SimulateMultiFingers: 1
   PinchTwistKey: 306
   MovePivotKey: 308

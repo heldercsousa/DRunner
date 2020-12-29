@@ -142,7 +142,6 @@ namespace DRunner.Scenes
                     colliderInstance.transform.parent = newPo.transform;
                 }
             }
-
             _UpdateSpawnPosition(newPo);
         }
 

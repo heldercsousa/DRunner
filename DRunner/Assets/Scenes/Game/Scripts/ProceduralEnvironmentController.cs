@@ -95,7 +95,7 @@ namespace DRunner.Scenes
             // }
 
             // removes oldest level elements at once (may show perfomance spikes)
-            _levelController.RemoveObjectsAtOldestDepth();
+            _levelController.RemoveObjectsAtOldestDepth().ToList();
 
             // lazy builds level elements over the road just created
             foreach (var obj in _levelController.BuildLevelForDepth(Depth))
